@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Smart Reminder</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">AI Productivity Companion</p>
+          <h1>Plan smarter, act sooner, and stop missing deadlines.</h1>
+          <p class="hero-copy">
+            Turn scattered commitments into prioritized action plans with urgency scoring,
+            schedule suggestions, context-aware nudges, and habit-aware recommendations.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#planner">Build my action plan</a>
+            <a class="button secondary" href="#insights">View insights</a>
+          </div>
+        </div>
+        <aside class="assistant-card" aria-label="Assistant recommendation preview">
+          <span class="pulse"></span>
+          <h2>Next best action</h2>
+          <p id="nextAction">Add tasks to receive a focused AI recommendation.</p>
+        </aside>
+      </section>
+
+      <section id="planner" class="panel planner-grid">
+        <form id="taskForm" class="task-form">
+          <h2>Add a commitment</h2>
+          <label>
+            Task
+            <input id="title" name="title" type="text" placeholder="Finish investor pitch deck" required />
+          </label>
+          <label>
+            Deadline
+            <input id="deadline" name="deadline" type="datetime-local" required />
+          </label>
+          <div class="form-row">
+            <label>
+              Impact
+              <select id="impact" name="impact">
+                <option value="5">Critical</option>
+                <option value="4">High</option>
+                <option value="3" selected>Medium</option>
+                <option value="2">Low</option>
+              </select>
+            </label>
+            <label>
+              Effort
+              <select id="effort" name="effort">
+                <option value="1">15 min</option>
+                <option value="2">30 min</option>
+                <option value="3" selected>1 hour</option>
+                <option value="4">2+ hours</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            Context
+            <select id="context" name="context">
+              <option>Study</option>
+              <option>Work</option>
+              <option>Finance</option>
+              <option>Interview</option>
+              <option>Health</option>
+              <option>Personal</option>
+            </select>
+          </label>
+          <label>
+            Energy right now
+            <select id="energy" name="energy">
+              <option value="deep">Deep focus</option>
+              <option value="normal" selected>Normal</option>
+              <option value="low">Low energy</option>
+            </select>
+          </label>
+          <button class="button primary" type="submit">Prioritize task</button>
+        </form>
+
+        <div class="task-board">
+          <div class="section-heading">
+            <h2>AI-prioritized queue</h2>
+            <button id="seedTasks" class="button secondary" type="button">Load examples</button>
+          </div>
+          <div id="taskList" class="task-list" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="insights" class="insights">
+        <article class="panel insight-card">
+          <h2>Smart scheduling</h2>
+          <p id="scheduleAdvice">Your focused work blocks will appear here after you add tasks.</p>
+        </article>
+        <article class="panel insight-card">
+          <h2>Productivity coaching</h2>
+          <p id="coachingAdvice">The assistant will recommend next actions based on urgency, impact, and effort.</p>
+        </article>
+        <article class="panel insight-card">
+          <h2>Context-aware reminders</h2>
+          <p id="reminderAdvice">Expect reminders that explain why a task matters and what to do first.</p>
+        </article>
+        <article class="panel insight-card autopilot-card">
+          <h2>Autopilot focus plan</h2>
+          <ol id="autopilotSteps" class="autopilot-steps"></ol>
+          <button id="calendarExport" class="button primary" type="button" disabled>Add plan to calendar</button>
+        </article>
+      </section>
+    </main>
+
+    <template id="taskTemplate">
+      <article class="task-card">
+        <div>
+          <p class="task-context"></p>
+          <h3></h3>
+          <p class="task-meta"></p>
+          <ol class="task-plan"></ol>
+        </div>
+        <div class="task-actions">
+          <div class="score-badge" aria-label="Priority score"></div>
+          <button class="button secondary small complete-task" type="button">Done</button>
+          <button class="button ghost small delete-task" type="button">Delete</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
