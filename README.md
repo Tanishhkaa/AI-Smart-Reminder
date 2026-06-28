@@ -9,6 +9,7 @@ AI Smart Reminder is a browser-based productivity companion prototype for studen
 - **Personalized productivity recommendations** that identify quick wins and high-impact next steps.
 - **Context-aware reminders** that explain why a task matters and prompt immediate action.
 - **Goal-oriented execution support** through concise next-best-action guidance.
+- **No backend required**: tasks are stored in the browser with `localStorage`, so the prototype works as a simple static app.
 
 ## Run locally
 

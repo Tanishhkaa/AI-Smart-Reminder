@@ -55,3 +55,9 @@ input, select { width: 100%; border: 1px solid var(--border); border-radius: 14p
 @media (max-width: 860px) {
   .hero, .planner-grid, .insights { grid-template-columns: 1fr; }
 }
+.task-actions { display: grid; gap: 10px; justify-items: end; }
+.small { padding: 8px 12px; font-size: 0.86rem; }
+.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.completed { opacity: 0.62; }
+.completed h3 { text-decoration: line-through; }
+.completed .score-badge { filter: grayscale(1); }

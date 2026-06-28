@@ -1,4 +1,5 @@
-const tasks = [];
+const STORAGE_KEY = "ai-smart-reminder-tasks";
+let tasks = loadTasks();
 
 const taskForm = document.querySelector("#taskForm");
 const taskList = document.querySelector("#taskList");
@@ -16,6 +17,19 @@ const formatDate = new Intl.DateTimeFormat(undefined, {
   hour: "numeric",
   minute: "2-digit",
 });
+
+function loadTasks() {
+  const savedTasks = localStorage.getItem(STORAGE_KEY);
+  return savedTasks ? JSON.parse(savedTasks) : [];
+}
+
+function saveTasks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function createTaskId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
 
 function setDefaultDeadline() {
   const tomorrowMorning = new Date();
@@ -67,6 +81,12 @@ function renderTasks() {
     node.querySelector(".task-context").textContent = task.context;
     node.querySelector("h3").textContent = task.title;
     node.querySelector(".task-meta").textContent = `${getScheduleWindow(task)} • Impact ${task.impact}/5 • Effort ${task.effort}/4`;
+    const card = node.querySelector(".task-card");
+    if (task.done) card.classList.add("completed");
+    const completeButton = node.querySelector(".complete-task");
+    completeButton.textContent = task.done ? "Undo" : "Done";
+    completeButton.dataset.id = task.id;
+    node.querySelector(".delete-task").dataset.id = task.id;
     const badge = node.querySelector(".score-badge");
     badge.textContent = task.score;
     badge.classList.add(getPriorityLabel(task.score));
@@ -77,17 +97,28 @@ function renderTasks() {
 }
 
 function updateInsights(sortedTasks) {
-  if (sortedTasks.length === 0) {
-    nextAction.textContent = "Add tasks to receive a focused AI recommendation.";
-    scheduleAdvice.textContent = "Your focused work blocks will appear here after you add tasks.";
-    coachingAdvice.textContent = "The assistant will recommend next actions based on urgency, impact, and effort.";
-    reminderAdvice.textContent = "Expect reminders that explain why a task matters and what to do first.";
+  const activeTasks = sortedTasks.filter((task) => !task.done);
+
+  if (activeTasks.length === 0) {
+    const message = sortedTasks.length === 0
+      ? "Add tasks to receive a focused AI recommendation."
+      : "Great work — all current tasks are complete. Add another commitment when you are ready.";
+    nextAction.textContent = message;
+    scheduleAdvice.textContent = sortedTasks.length === 0
+      ? "Your focused work blocks will appear here after you add tasks."
+      : "No active work blocks are needed right now.";
+    coachingAdvice.textContent = sortedTasks.length === 0
+      ? "The assistant will recommend next actions based on urgency, impact, and effort."
+      : "Review your completed list, then add the next meaningful goal.";
+    reminderAdvice.textContent = sortedTasks.length === 0
+      ? "Expect reminders that explain why a task matters and what to do first."
+      : "Reminders are paused because there are no active tasks.";
     return;
   }
 
-  const topTask = sortedTasks[0];
-  const quickWin = sortedTasks.find((task) => Number(task.effort) <= 2) || topTask;
-  const highImpact = sortedTasks.find((task) => Number(task.impact) >= 4) || topTask;
+  const topTask = activeTasks[0];
+  const quickWin = activeTasks.find((task) => Number(task.effort) <= 2) || topTask;
+  const highImpact = activeTasks.find((task) => Number(task.impact) >= 4) || topTask;
 
   nextAction.textContent = `Start “${topTask.title}” now. It has the highest priority score because its deadline, impact, and context make it risky to delay.`;
   scheduleAdvice.textContent = `Block ${getScheduleWindow(topTask)}. Then reserve a shorter recovery block for “${quickWin.title}” to keep momentum high.`;
@@ -96,9 +127,30 @@ function updateInsights(sortedTasks) {
 }
 
 function addTask(task) {
-  tasks.push({ id: crypto.randomUUID(), ...task });
+  tasks.push({ id: createTaskId(), done: false, ...task });
+  saveTasks();
   renderTasks();
 }
+
+function toggleTask(id) {
+  tasks = tasks.map((task) => (task.id === id ? { ...task, done: !task.done } : task));
+  saveTasks();
+  renderTasks();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter((task) => task.id !== id);
+  saveTasks();
+  renderTasks();
+}
+
+taskList.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-id]");
+  if (!button) return;
+
+  if (button.classList.contains("complete-task")) toggleTask(button.dataset.id);
+  if (button.classList.contains("delete-task")) deleteTask(button.dataset.id);
+});
 
 taskForm.addEventListener("submit", (event) => {
   event.preventDefault();
