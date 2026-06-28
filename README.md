@@ -29,3 +29,9 @@ Then visit <http://localhost:8000>.
 - `index.html` — application markup and content sections.
 - `styles.css` — responsive visual design and component styling.
 - `app.js` — prioritization, scheduling recommendations, and interactive task rendering.
+
+## Gemini and calendar troubleshooting
+
+- Gemini enhancement requires a valid Gemini API key from Google AI Studio. The key is entered in the UI and saved only in the current browser.
+- If the Gemini button is disabled, save a key and add or load at least one active task first.
+- Calendar export does not require Gemini; it downloads the currently visible Autopilot plan as an `.ics` file.

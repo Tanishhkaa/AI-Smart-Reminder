@@ -42,10 +42,17 @@ function getGeminiKey() {
 
 function updateAiStatus(message) {
   const hasKey = Boolean(getGeminiKey());
+  const hasActivePlan = Boolean(calendarExport.dataset.taskId);
   aiStatus.textContent = message || (hasKey
-    ? "Gemini connected — ask it to improve your Autopilot plan."
-    : "Gemini not connected — using instant local planning.");
-  geminiEnhance.disabled = !hasKey || !calendarExport.dataset.taskId;
+    ? "Gemini key saved. Add or load a task, then improve the Autopilot plan."
+    : "Step 1: save a Gemini API key. Step 2: add or load a task.");
+  geminiEnhance.disabled = !hasKey || !hasActivePlan;
+  geminiEnhance.title = !hasKey
+    ? "Save a Gemini API key first"
+    : !hasActivePlan
+      ? "Add or load a task first"
+      : "Ask Gemini to rewrite the visible Autopilot steps";
+  calendarExport.title = hasActivePlan ? "Download the visible Autopilot plan as an .ics file" : "Add or load a task first";
 }
 
 function createTaskId() {
@@ -213,11 +220,24 @@ taskList.addEventListener("click", (event) => {
   if (button.classList.contains("delete-task")) deleteTask(button.dataset.id);
 });
 
+function getVisiblePlanSteps(task) {
+  const visibleSteps = [...autopilotSteps.querySelectorAll("li")]
+    .map((item) => item.textContent.trim())
+    .filter(Boolean);
+  return visibleSteps.length > 0 ? visibleSteps : buildActionSteps(task);
+}
+
+function escapeCalendarText(text) {
+  return text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+}
+
 function downloadCalendarPlan(task) {
-  const start = new Date(Math.min(Date.now() + 15 * 6e4, new Date(task.deadline).getTime() - getEffortMinutes(task) * 6e4));
+  const latestStart = new Date(task.deadline).getTime() - getEffortMinutes(task) * 6e4;
+  const startTime = Math.max(Date.now(), Math.min(Date.now() + 15 * 6e4, latestStart));
+  const start = new Date(startTime);
   const end = new Date(start.getTime() + getEffortMinutes(task) * 6e4);
   const formatCalendarDate = (date) => date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-  const description = buildActionSteps(task).map((step, index) => `${index + 1}. ${step}`).join("\n");
+  const description = getVisiblePlanSteps(task).map((step, index) => `${index + 1}. ${step}`).join("\n");
   const calendarText = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -227,22 +247,25 @@ function downloadCalendarPlan(task) {
     `DTSTAMP:${formatCalendarDate(new Date())}`,
     `DTSTART:${formatCalendarDate(start)}`,
     `DTEND:${formatCalendarDate(end)}`,
-    `SUMMARY:Focus block: ${task.title}`,
-    `DESCRIPTION:${description}`,
+    `SUMMARY:${escapeCalendarText(`Focus block: ${task.title}`)}`,
+    `DESCRIPTION:${escapeCalendarText(description)}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(new Blob([calendarText], { type: "text/calendar" }));
+  link.href = URL.createObjectURL(new Blob([calendarText], { type: "text/calendar;charset=utf-8" }));
   link.download = `${task.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-focus-plan.ics`;
+  document.body.appendChild(link);
   link.click();
+  link.remove();
   URL.revokeObjectURL(link.href);
+  updateAiStatus("Calendar file downloaded for the visible Autopilot plan.");
 }
 
 async function enhancePlanWithGemini(task) {
   const key = getGeminiKey();
   if (!key) {
-    updateAiStatus("Paste and save a Gemini API key to use live AI coaching.");
+    updateAiStatus("Save a Gemini API key first. Calendar export still works without Gemini.");
     return;
   }
 
@@ -264,7 +287,7 @@ async function enhancePlanWithGemini(task) {
     });
 
     if (!response.ok) {
-      updateAiStatus("Gemini request failed. Check that the API key is valid and enabled.");
+      updateAiStatus(`Gemini request failed (${response.status}). Check that this is a valid Gemini API key with API access enabled.`);
       return;
     }
 
@@ -313,7 +336,10 @@ saveGeminiKey.addEventListener("click", () => {
   }
   localStorage.setItem(GEMINI_KEY, key);
   geminiKey.value = "";
-  updateAiStatus("Gemini key saved in this browser only.");
+  const looksLikeGeminiKey = key.startsWith("AIza") && key.length > 30;
+  updateAiStatus(looksLikeGeminiKey
+    ? "Gemini key saved in this browser only. Add/load a task, then ask Gemini."
+    : "Key saved, but it does not look like a standard Gemini API key. If Gemini fails, create an API key in Google AI Studio.");
 });
 
 clearGeminiKey.addEventListener("click", () => {

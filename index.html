@@ -33,14 +33,14 @@
         <div>
           <p class="eyebrow">Optional live AI</p>
           <h2>Connect Gemini for richer coaching</h2>
-          <p>Paste your Gemini API key here to keep it only in this browser. The app still works offline with built-in planning if no key is saved.</p>
+          <p>Paste a Gemini API key, add or load a task, then use “Ask Gemini to improve plan.” Calendar export works with or without Gemini.</p>
         </div>
         <div class="key-controls">
           <input id="geminiKey" type="password" placeholder="Paste Gemini API key" autocomplete="off" />
           <button id="saveGeminiKey" class="button secondary" type="button">Save key</button>
           <button id="clearGeminiKey" class="button ghost" type="button">Clear</button>
         </div>
-        <p id="aiStatus" class="ai-status">Gemini not connected — using instant local planning.</p>
+        <p id="aiStatus" class="ai-status">Step 1: save a Gemini API key. Step 2: add or load a task.</p>
       </section>
 
       <section id="planner" class="panel planner-grid">
@@ -122,8 +122,8 @@
           <h2>Autopilot focus plan</h2>
           <ol id="autopilotSteps" class="autopilot-steps"></ol>
           <div class="autopilot-actions">
-            <button id="geminiEnhance" class="button secondary" type="button" disabled>Ask Gemini to improve plan</button>
-            <button id="calendarExport" class="button primary" type="button" disabled>Add plan to calendar</button>
+            <button id="geminiEnhance" class="button secondary" type="button" disabled title="Save a Gemini API key and add a task first">Ask Gemini to improve plan</button>
+            <button id="calendarExport" class="button primary" type="button" disabled title="Add a task first">Add plan to calendar</button>
           </div>
         </article>
       </section>
