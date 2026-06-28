@@ -69,3 +69,74 @@ button:disabled { cursor: not-allowed; opacity: 0.5; }
 @media (min-width: 980px) {
   .autopilot-card { grid-column: span 3; }
 }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+.hero { position: relative; }
+.hero::after {
+  content: "";
+  position: absolute;
+  right: 4%;
+  top: 12%;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(39, 211, 162, 0.24), transparent 68%);
+  filter: blur(4px);
+  z-index: -1;
+}
+.assistant-card, .panel {
+  backdrop-filter: blur(22px);
+}
+.assistant-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(124, 92, 255, 0.8), rgba(39, 211, 162, 0.65), transparent);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.assistant-chip, .ai-status {
+  display: inline-flex;
+  width: fit-content;
+  border: 1px solid rgba(39, 211, 162, 0.35);
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: var(--accent);
+  background: rgba(39, 211, 162, 0.08);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+.ai-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 24px;
+  border-color: rgba(124, 92, 255, 0.38);
+}
+.ai-panel p { color: var(--muted); line-height: 1.6; margin-bottom: 0; }
+.key-controls { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; }
+.autopilot-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.task-card {
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+.task-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(124, 92, 255, 0.42);
+  background: rgba(255, 255, 255, 0.08);
+}
+@media (max-width: 860px) {
+  .ai-panel, .key-controls { grid-template-columns: 1fr; }
+}

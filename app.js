@@ -1,4 +1,6 @@
 const STORAGE_KEY = "ai-smart-reminder-tasks";
+const GEMINI_KEY = "ai-smart-reminder-gemini-key";
+const GEMINI_MODEL = "gemini-2.5-flash";
 let tasks = loadTasks();
 
 const taskForm = document.querySelector("#taskForm");
@@ -11,6 +13,11 @@ const reminderAdvice = document.querySelector("#reminderAdvice");
 const seedTasks = document.querySelector("#seedTasks");
 const autopilotSteps = document.querySelector("#autopilotSteps");
 const calendarExport = document.querySelector("#calendarExport");
+const geminiEnhance = document.querySelector("#geminiEnhance");
+const geminiKey = document.querySelector("#geminiKey");
+const saveGeminiKey = document.querySelector("#saveGeminiKey");
+const clearGeminiKey = document.querySelector("#clearGeminiKey");
+const aiStatus = document.querySelector("#aiStatus");
 const deadlineInput = document.querySelector("#deadline");
 
 const formatDate = new Intl.DateTimeFormat(undefined, {
@@ -27,6 +34,18 @@ function loadTasks() {
 
 function saveTasks() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function getGeminiKey() {
+  return localStorage.getItem(GEMINI_KEY) || "";
+}
+
+function updateAiStatus(message) {
+  const hasKey = Boolean(getGeminiKey());
+  aiStatus.textContent = message || (hasKey
+    ? "Gemini connected — ask it to improve your Autopilot plan."
+    : "Gemini not connected — using instant local planning.");
+  geminiEnhance.disabled = !hasKey || !calendarExport.dataset.taskId;
 }
 
 function createTaskId() {
@@ -145,6 +164,7 @@ function updateInsights(sortedTasks) {
     autopilotSteps.innerHTML = "";
     calendarExport.disabled = true;
     calendarExport.removeAttribute("data-task-id");
+    updateAiStatus();
     return;
   }
 
@@ -164,6 +184,7 @@ function updateInsights(sortedTasks) {
   });
   calendarExport.disabled = false;
   calendarExport.dataset.taskId = topTask.id;
+  updateAiStatus();
 }
 
 function addTask(task) {
@@ -218,9 +239,87 @@ function downloadCalendarPlan(task) {
   URL.revokeObjectURL(link.href);
 }
 
+async function enhancePlanWithGemini(task) {
+  const key = getGeminiKey();
+  if (!key) {
+    updateAiStatus("Paste and save a Gemini API key to use live AI coaching.");
+    return;
+  }
+
+  updateAiStatus("Gemini is improving your plan...");
+  geminiEnhance.disabled = true;
+  const prompt = `Create a concise productivity plan for this task. Return exactly 4 short action steps, no intro. Task: ${task.title}. Context: ${task.context}. Deadline: ${task.deadline}. Energy: ${task.energy || "normal"}. Impact: ${task.impact}/5. Effort: ${task.effort}/4.`;
+  let data;
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-goog-api-key": key,
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
+    });
+
+    if (!response.ok) {
+      updateAiStatus("Gemini request failed. Check that the API key is valid and enabled.");
+      return;
+    }
+
+    data = await response.json();
+  } catch (error) {
+    updateAiStatus("Gemini is unreachable right now. Local planning still works.");
+    return;
+  }
+
+  const text = data.candidates?.[0]?.content?.parts?.map((part) => part.text).join(" ") || "";
+  const steps = text
+    .split(/\n|\d+[.)]|[-*•]/)
+    .map((step) => step.trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  if (steps.length === 0) {
+    updateAiStatus("Gemini responded, but no steps were returned. Try again.");
+    return;
+  }
+
+  autopilotSteps.innerHTML = "";
+  steps.forEach((step) => {
+    const item = document.createElement("li");
+    item.textContent = step;
+    autopilotSteps.appendChild(item);
+  });
+  updateAiStatus("Gemini upgraded the plan. You can now add it to your calendar.");
+}
+
 calendarExport.addEventListener("click", () => {
   const task = tasks.find((item) => item.id === calendarExport.dataset.taskId);
   if (task) downloadCalendarPlan(task);
+});
+
+geminiEnhance.addEventListener("click", () => {
+  const task = tasks.find((item) => item.id === calendarExport.dataset.taskId);
+  if (task) enhancePlanWithGemini(task);
+});
+
+saveGeminiKey.addEventListener("click", () => {
+  const key = geminiKey.value.trim();
+  if (!key) {
+    updateAiStatus("Paste a Gemini API key before saving.");
+    return;
+  }
+  localStorage.setItem(GEMINI_KEY, key);
+  geminiKey.value = "";
+  updateAiStatus("Gemini key saved in this browser only.");
+});
+
+clearGeminiKey.addEventListener("click", () => {
+  localStorage.removeItem(GEMINI_KEY);
+  geminiKey.value = "";
+  updateAiStatus("Gemini key cleared. Local planning is still available.");
 });
 
 taskForm.addEventListener("submit", (event) => {
@@ -247,3 +346,4 @@ seedTasks.addEventListener("click", () => {
 
 setDefaultDeadline();
 renderTasks();
+updateAiStatus();

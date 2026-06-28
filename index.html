@@ -13,8 +13,8 @@
           <p class="eyebrow">AI Productivity Companion</p>
           <h1>Plan smarter, act sooner, and stop missing deadlines.</h1>
           <p class="hero-copy">
-            Turn scattered commitments into prioritized action plans with urgency scoring,
-            schedule suggestions, context-aware nudges, and habit-aware recommendations.
+            Turn scattered commitments into prioritized action plans with Gemini-powered coaching,
+            urgency scoring, calendar-ready focus blocks, and context-aware nudges.
           </p>
           <div class="hero-actions">
             <a class="button primary" href="#planner">Build my action plan</a>
@@ -23,9 +23,24 @@
         </div>
         <aside class="assistant-card" aria-label="Assistant recommendation preview">
           <span class="pulse"></span>
+          <p class="assistant-chip">Gemini optional</p>
           <h2>Next best action</h2>
           <p id="nextAction">Add tasks to receive a focused AI recommendation.</p>
         </aside>
+      </section>
+
+      <section class="panel ai-panel" aria-label="Gemini setup">
+        <div>
+          <p class="eyebrow">Optional live AI</p>
+          <h2>Connect Gemini for richer coaching</h2>
+          <p>Paste your Gemini API key here to keep it only in this browser. The app still works offline with built-in planning if no key is saved.</p>
+        </div>
+        <div class="key-controls">
+          <input id="geminiKey" type="password" placeholder="Paste Gemini API key" autocomplete="off" />
+          <button id="saveGeminiKey" class="button secondary" type="button">Save key</button>
+          <button id="clearGeminiKey" class="button ghost" type="button">Clear</button>
+        </div>
+        <p id="aiStatus" class="ai-status">Gemini not connected — using instant local planning.</p>
       </section>
 
       <section id="planner" class="panel planner-grid">
@@ -106,7 +121,10 @@
         <article class="panel insight-card autopilot-card">
           <h2>Autopilot focus plan</h2>
           <ol id="autopilotSteps" class="autopilot-steps"></ol>
-          <button id="calendarExport" class="button primary" type="button" disabled>Add plan to calendar</button>
+          <div class="autopilot-actions">
+            <button id="geminiEnhance" class="button secondary" type="button" disabled>Ask Gemini to improve plan</button>
+            <button id="calendarExport" class="button primary" type="button" disabled>Add plan to calendar</button>
+          </div>
         </article>
       </section>
     </main>
