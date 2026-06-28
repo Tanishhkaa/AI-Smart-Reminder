@@ -61,3 +61,11 @@ input, select { width: 100%; border: 1px solid var(--border); border-radius: 14p
 .completed { opacity: 0.62; }
 .completed h3 { text-decoration: line-through; }
 .completed .score-badge { filter: grayscale(1); }
+.autopilot-card { border-color: rgba(39, 211, 162, 0.34); }
+.autopilot-steps, .task-plan { color: var(--muted); line-height: 1.55; padding-left: 20px; }
+.task-plan { margin: 10px 0 0; }
+.autopilot-steps:empty::before { content: "Add a task to generate a step-by-step focus plan."; color: var(--muted); }
+button:disabled { cursor: not-allowed; opacity: 0.5; }
+@media (min-width: 980px) {
+  .autopilot-card { grid-column: span 3; }
+}

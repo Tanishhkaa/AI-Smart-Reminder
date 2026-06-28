@@ -70,6 +70,14 @@
               <option>Personal</option>
             </select>
           </label>
+          <label>
+            Energy right now
+            <select id="energy" name="energy">
+              <option value="deep">Deep focus</option>
+              <option value="normal" selected>Normal</option>
+              <option value="low">Low energy</option>
+            </select>
+          </label>
           <button class="button primary" type="submit">Prioritize task</button>
         </form>
 
@@ -95,6 +103,11 @@
           <h2>Context-aware reminders</h2>
           <p id="reminderAdvice">Expect reminders that explain why a task matters and what to do first.</p>
         </article>
+        <article class="panel insight-card autopilot-card">
+          <h2>Autopilot focus plan</h2>
+          <ol id="autopilotSteps" class="autopilot-steps"></ol>
+          <button id="calendarExport" class="button primary" type="button" disabled>Add plan to calendar</button>
+        </article>
       </section>
     </main>
 
@@ -104,6 +117,7 @@
           <p class="task-context"></p>
           <h3></h3>
           <p class="task-meta"></p>
+          <ol class="task-plan"></ol>
         </div>
         <div class="task-actions">
           <div class="score-badge" aria-label="Priority score"></div>
