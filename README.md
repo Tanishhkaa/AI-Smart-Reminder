@@ -10,8 +10,6 @@ AI Smart Reminder is a browser-based productivity companion prototype for studen
 - **Context-aware reminders** that explain why a task matters and prompt immediate action.
 - **Goal-oriented execution support** through concise next-best-action guidance.
 - **No backend required**: tasks are stored in the browser with `localStorage`, so the prototype works as a simple static app.
-- **Autopilot focus plans** that break the highest-priority task into context-aware steps and export the plan as an `.ics` calendar block.
-- **Energy-aware recommendations** that adapt priority, suggested effort, and next steps based on whether the user has deep focus, normal energy, or low energy.
 
 ## Run locally
 
